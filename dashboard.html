@@ -165,6 +165,56 @@
     .location p {
       margin: 5px 0;
     }
+    .chat-container {
+    width: 400px;
+    margin-left: auto;
+    border: 1px solid #1e2a38;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(236, 238, 242, 0.544);
+}
+
+.chatbox {
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.bot-message {
+        background: #1e2a38;
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 5px;
+        width: fit-content;
+    }
+
+    .user-message {
+        background: #1e2a38;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px;
+    margin-left: auto;
+    width: fit-content;
+}
+
+.input-area {
+    display: flex;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+}
+
+.input-area button {
+    padding: 10px 20px;
+    border: none;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -227,46 +277,25 @@
 
     <!-- AI Assistant Section (from previous upgrade) -->
     <section aria-label="AI Assistant">
-      <h3>AI Assistant</h3>
-      <ul>
-        <li><button onclick="sendQuickMessage('Is this area safe at night?')">Is this area safe at night?</button></li>
-        <li><button onclick="sendQuickMessage('Nearest hospital from here?')">Nearest hospital from here?</button></li>
-        <li><button onclick="sendQuickMessage('Weather risk in Pokhara?')">Weather risk in Pokhara?</button></li>
-      </ul>
-      <button onclick="toggleChat()">Chat Now</button>
-      <div class="chat-box" id="chatBox" aria-live="polite"></div>
-      <div class="chat-input" id="chatInput" style="display:none;">
-        <input type="text" id="userMessage" placeholder="Type your message...">
+      <div class="chat-container">
+    <div id="chatbox" class="chatbox">
+        <div class="bot-message">
+            Hello! I'm SafeTrail AI. How can I help you?
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask me anything...">
         <button onclick="sendMessage()">Send</button>
-      </div>
+    </div>
+</div>
+      
     </section>
 
-    <section aria-label="Recent alerts">
-      <h3>Recent Alerts</h3>
-      <ul>
-        <li>Heavy Rain Warning in Pokhara (2 hours ago)</li>
-        <li>Road Blocked: Annapurna Trail (5 hours ago)</li>
-        <li>Flood Warning in Chitwan (1 day ago)</li>
-      </ul>
-    </section>
+   
 
-    <section aria-label="Nearby emergency services">
-      <h3>Nearby Emergency Services</h3>
-      <ul>
-        <li>Hospital – Civil Service Hospital (1.2 km)</li>
-        <li>Police Station – Thamel Police Station (800 m)</li>
-        <li>Tourist Help Center – Tourist Service Center (650 m)</li>
-      </ul>
-    </section>
-
-    <section aria-label="Location insights">
-      <h3>Location Insights: Laketide, Pokhara</h3>
-      <p>Risk Level: Low</p>
-      <p>Crowd Density: Medium</p>
-      <p>Weather: Good</p>
-      <p>Police Nearby: 2 Stations</p>
-      <p>Hospitals Nearby: 3 Hospitals</p>
-    </section>
+    
+    
   </main>
 
   <script>
@@ -287,55 +316,80 @@
         activeAlertsStat.textContent = `Active Alerts: ${count}`;
       }
     }
+    function sendMessage() {
+    let input = document.getElementById("userInput");
+    let message = input.value.trim();
 
-    function toggleChat() {
-      const chatBox = document.getElementById('chatBox');
-      const chatInput = document.getElementById('chatInput');
-       if (chatBox.style.display === 'none' || chatBox.style.display === '') {
-      chatBox.style.display = 'block';
-      chatInput.style.display = 'flex';
-    } else {
-      chatBox.style.display = 'none';
-      chatInput.style.display = 'none';
-    }
-  }
+    if (message === "") return;
 
-  function sendQuickMessage(message) {
-    addMessage(message, 'user');
+    addMessage(message, "user");
+
+    let reply = getBotResponse(message.toLowerCase());
+
     setTimeout(() => {
-      addMessage("AI Assistant response to: " + message, 'ai');
+        addMessage(reply, "bot");
     }, 500);
-  }
 
-  function sendMessage() {
-    const input = document.getElementById('userMessage');
-    const message = input.value.trim();
-    if (message) {
-      addMessage(message, 'user');
-      input.value = '';
-      setTimeout(() => {
-        addMessage("AI Assistant response to: " + message, 'ai');
-      }, 500);
+    input.value = "";
+}
+
+function addMessage(text, sender) {
+    const chatbox = document.getElementById("chatbox");
+
+    const div = document.createElement("div");
+    div.className = sender === "user"
+        ? "user-message"
+        : "bot-message";
+
+    div.textContent = text;
+
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function getBotResponse(msg) {
+
+    if (msg.includes("safe")) {
+        return "Always check weather updates and stay on marked routes.";
     }
-  }
 
-  function addMessage(text, sender) {
-    const chatBox = document.getElementById('chatBox');
-    const msgDiv = document.createElement('div');
-    msgDiv.classList.add('chat-message');
-    if (sender === 'user') {
-      msgDiv.classList.add('user-message');
-    } else {
-      msgDiv.classList.add('ai-message');
+    if (msg.includes("hospital")) {
+        return "Nearest hospitals can be viewed on the map section.";
     }
-    msgDiv.textContent = text;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll to latest message
-  }
 
-  updateActiveAlertsCount();
+    if (msg.includes("weather")) {
+        return "Please check the weather alert panel for live updates.";
+    }
 
-window.onload = function () {
+    if (msg.includes("emergency")) {
+        return "Press the SOS button to contact emergency services.";
+    }
+
+    if (msg.includes("landslide")) {
+        return "Avoid travelling in landslide-prone areas during heavy rainfall.";
+    }
+
+    if (msg.includes("trek")) {
+        return "Carry water, offline maps, and check weather conditions before trekking.";
+    }
+
+    if (msg.includes("police")) {
+        return "The nearest police station is available in the Safety Services section.";
+    }
+
+    if (msg.includes("hello") || msg.includes("hi")) {
+        return "Hello! How can I help you travel safely in Nepal?";
+    }
+
+    return "Sorry, I don't understand that yet. Please try asking about weather, safety, hospitals, trekking, or emergencies.";
+   }
+
+
+ 
+
+   updateActiveAlertsCount();
+
+   window.onload = function () {
 
     if (navigator.geolocation) {
 
