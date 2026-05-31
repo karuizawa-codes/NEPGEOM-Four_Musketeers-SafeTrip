@@ -85,6 +85,59 @@ http.createServer((req, res) => {
         return;
     }
 
+    if (req.method === "POST" && req.url === "/login") {
+
+    let body = "";
+
+    req.on("data", chunk => {
+        body += chunk;
+    });
+
+    req.on("end", () => {
+
+        const { email, password } = JSON.parse(body);
+
+        let users = [];
+
+        try {
+            users = JSON.parse(
+                fs.readFileSync("credentials.json", "utf8")
+            );
+        } catch {
+            users = [];
+        }
+
+        const crypto = require("crypto");
+
+        const hashedPassword =
+            crypto.createHash("sha256")
+                .update(password)
+                .digest("hex");
+
+        const user = users.find(u => u.email === email);
+
+        if (!user) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({
+                message: "User not found"
+            }));
+        }
+
+        if (user.password !== hashedPassword) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({
+                message: "Incorrect password"
+            }));
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({
+            message: "Login successful"
+        }));
+    });
+
+    return;
+    }
     res.writeHead(404);
     res.end();
 
