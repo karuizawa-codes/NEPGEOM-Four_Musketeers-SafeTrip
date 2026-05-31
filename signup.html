@@ -419,7 +419,7 @@ label{
 
         <div class="login">
             Already have an account?
-            <a href="#">Login</a>
+            <a href="signin.html">Login</a>
         </div>
 
     </div>
@@ -429,7 +429,7 @@ label{
 <script>
 document
     .getElementById("signupForm")
-    .addEventListener("submit", function(e){
+    .addEventListener("submit", async function(e){
 
         e.preventDefault();
 
@@ -458,17 +458,39 @@ document
             return;
         }
 
-        const userData = {
-            fullName,
-            email,
-            phone
-        };
+        try{
 
-        console.log("User Registered:", userData);
+            const response = await fetch(
+                "http://localhost:3000/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        email,
+                        phone,
+                        password
+                    })
+                }
+            );
 
-        alert("Registration successful!");
+            const result = await response.json();
 
-        document.getElementById("signupForm").reset();
+            alert(result.message);
+
+            if(response.ok){
+                document.getElementById("signupForm").reset();
+            }
+
+        }catch(error){
+
+            console.error(error);
+            alert("Cannot connect to server.");
+
+        }
+
 });
 </script>
 
