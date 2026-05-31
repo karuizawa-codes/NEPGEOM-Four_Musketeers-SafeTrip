@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeTrip Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+    }
+    nav.sidebar {
+      width: 250px;
+      background: #1e2a38;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      padding: 20px 0;
+    }
+    nav.sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    nav.sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    nav.sidebar li {
+      padding: 12px 20px;
+      cursor: pointer;
+    }
+    nav.sidebar li:hover,
+    nav.sidebar li:focus {
+      background: #2f3b4a;
+      outline: none;
+    }
+    .profile {
+      padding: 20px;
+      border-top: 1px solid #444;
+      text-align: center;
+      font-size: 14px;
+    }
+    main {
+      flex: 1;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header-text h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .header-text p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .header-actions button {
+      background: #1e2a38;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .notification-panel {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      width: 250px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .notification-panel h4 {
+      margin: 0 0 10px 0;
+    }
+    .notification-panel ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .notification-panel li {
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      flex: 1;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .map-preview {
+      background: #fff;
+      height: 200px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+    }
+    section {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    section h3 {
+      margin-top: 0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    .location p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <nav class="sidebar" aria-label="Main navigation">
+    <h2>SafeTrip</h2>
+    <ul>
+      <li tabindex="0">Dashboard</li>
+      <li tabindex="0">Live Map</li>
+      <li tabindex="0">Alerts</li>
+      <li tabindex="0">My Trips</li>
+      <li tabindex="0">Check-ins</li>
+      <li tabindex="0">AI Assistant</li>
+      <li tabindex="0">Health Services</li>
+      <li tabindex="0">Route Planner</li>
+      <li tabindex="0">Travel Advisory</li>
+      <li tabindex="0">Settings</li>
+    </ul>
+    <div class="profile" role="contentinfo">
+      Priya Adhikari – Traveler
+    </div>
+  </nav>
+
+  <main>
+    <!-- Header with split text, notification, and weather -->
+    <header>
+      <div class="header-text">
+        <h1>Good Morning, Priya!</h1>
+        <p>Stay informed. Stay alert. Stay safe.</p>
+      </div>
+      <div class="header-actions">
+        <button onclick="toggleNotifications()">🔔 Notifications</button>
+        <button onclick="showWeather()">☀️ Weather</button>
+      </div>
+    </header>
+
+    <!-- Notification panel -->
+    <div class="notification-panel" id="notificationPanel">
+      <h4>Notifications</h4>
+      <ul>
+        <li>Heavy Rain Warning in Pokhara</li>
+        <li>Road Blocked: Annapurna Trail</li>
+        <li>Flood Warning in Chitwan</li>
+      </ul>
+    </div>
+
+    <section class="stats" aria-label="Safety statistics">
+      <div class="stat" role="status">Overall Safety: 8.6/10 Very Good</div>
+      <div class="stat" role="status">Active Alerts: 3</div>
+      <div class="stat" role="status">Check-ins: 12 This Trip</div>
+      <div class="stat" role="status">SOS Used: 0 This Trip</div>
+    </section>
+
+    <section class="map-preview" aria-label="Live safety map preview">
+      [Live Safety Map Preview]
+    </section>
+
+    <!-- AI Assistant Section (from previous upgrade) -->
+    <section aria-label="AI Assistant">
+      <h3>AI Assistant</h3>
+      <ul>
+        <li><button onclick="sendQuickMessage('Is this area safe at night?')">Is this area safe at night?</button></li>
+        <li><button onclick="sendQuickMessage('Nearest hospital from here?')">Nearest hospital from here?</button></li>
+        <li><button onclick="sendQuickMessage('Weather risk in Pokhara?')">Weather risk in Pokhara?</button></li>
+      </ul>
+      <button onclick="toggleChat()">Chat Now</button>
+      <div class="chat-box" id="chatBox" aria-live="polite"></div>
+      <div class="chat-input" id="chatInput" style="display:none;">
+        <input type="text" id="userMessage" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </section>
+
+    <section aria-label="Recent alerts">
+      <h3>Recent Alerts</h3>
+      <ul>
+        <li>Heavy Rain Warning in Pokhara (2 hours ago)</li>
+        <li>Road Blocked: Annapurna Trail (5 hours ago)</li>
+        <li>Flood Warning in Chitwan (1 day ago)</li>
+      </ul>
+    </section>
+
+    <section aria-label="Nearby emergency services">
+      <h3>Nearby Emergency Services</h3>
+      <ul>
+        <li>Hospital – Civil Service Hospital (1.2 km)</li>
+        <li>Police Station – Thamel Police Station (800 m)</li>
+        <li>Tourist Help Center – Tourist Service Center (650 m)</li>
+      </ul>
+    </section>
+
+    <section aria-label="Location insights">
+      <h3>Location Insights: Laketide, Pokhara</h3>
+      <p>Risk Level: Low</p>
+      <p>Crowd Density: Medium</p>
+      <p>Weather: Good</p>
+      <p>Police Nearby: 2 Stations</p>
+      <p>Hospitals Nearby: 3 Hospitals</p>
+    </section>
+  </main>
+
+  <script>
+    function toggleNotifications() {
+      const panel = document.getElementById('notificationPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function showWeather() {
+      alert("Current Weather: Sunny, 25°C");
+    }
+
+    function toggleChat() {
+      const chatBox = document.getElementById('chatBox');
+      const chatInput = document.getElementById('chatInput');
+       if (chatBox.style.display === 'none' || chatBox.style.display === '') {
+      chatBox.style.display = 'block';
+      chatInput.style.display = 'flex';
+    } else {
+      chatBox.style.display = 'none';
+      chatInput.style.display = 'none';
+    }
+  }
+
+  function sendQuickMessage(message) {
+    addMessage(message, 'user');
+    setTimeout(() => {
+      addMessage("AI Assistant response to: " + message, 'ai');
+    }, 500);
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('userMessage');
+    const message = input.value.trim();
+    if (message) {
+      addMessage(message, 'user');
+      input.value = '';
+      setTimeout(() => {
+        addMessage("AI Assistant response to: " + message, 'ai');
+      }, 500);
+    }
+  }
+
+  function addMessage(text, sender) {
+    const chatBox = document.getElementById('chatBox');
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('chat-message');
+    if (sender === 'user') {
+      msgDiv.classList.add('user-message');
+    } else {
+      msgDiv.classList.add('ai-message');
+    }
+    msgDiv.textContent = text;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll to latest message
+  }
+</script>
+SS

@@ -1,0 +1,53 @@
+{
+  "touristSpots": [
+    {
+      "name": "Boudhanath Stupa",
+      "coords": [27.7215, 85.3620],
+      "description": "World heritage site and popular pilgrimage destination."
+    },
+    {
+      "name": "Patan Durbar Square",
+      "coords": [27.6724, 85.3241],
+      "description": "Historic palace complex and prime cultural attraction."
+    }
+
+  ],
+  "disasterZones": [
+    {
+      "name": "Landslide Risk Zone",
+      "coords": [27.6800, 85.3600],
+      "radius": 1500,
+      "description": "Steep hillside area with past landslide activity."
+    },
+    {
+      "name": "Flood-Prone Corridor",
+      "coords": [27.6950, 85.3200],
+      "radius": 1200,
+      "description": "River-adjacent zone prone to seasonal flooding."
+    }
+  ],
+  "conditionAreas": [
+    {
+      "name": "Low Risk Zone",
+      "coords": [
+        [27.7400, 85.3000],
+        [27.7400, 85.3500],
+        [27.7000, 85.3500],
+        [27.7000, 85.3000]
+      ],
+      "color": "#33a02c",
+      "description": "Stable geospatial conditions with low disaster risk."
+    },
+    {
+      "name": "Moderate Risk Zone",
+      "coords": [
+        [27.6900, 85.3100],
+        [27.6900, 85.3600],
+        [27.6500, 85.3600],
+        [27.6500, 85.3100]
+      ],
+      "color": "#ff7f00",
+      "description": "Moderate risk due to weather, terrain, or infrastructure."
+    }
+  ]
+}

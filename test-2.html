@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geospatial Smart Mapping</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+    }
+    #map {
+      width: 100%;
+      height: 500px;
+      border: 2px solid red;
+    }
+    .sidebar {
+      padding: 16px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      max-width: 1000px;
+      margin: 16px auto;
+      border-radius: 12px;
+    }
+    .sidebar h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8f9ff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #dde2f0;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid #999;
+    }
+    .info-box {
+      margin-top: 16px;
+      padding: 14px;
+      background: #f9fbff;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+    }
+    .info-box p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .controls button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #1f78b4;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .controls button.icon-button {
+      width: 44px;
+      min-width: 44px;
+      padding: 0;
+    }
+    .controls button img {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+    .controls .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .controls button.active {
+      background: #155a8a;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h1>Geospatial Smart Mapping</h1>    
+    <div class="controls">
+      <button id="addMarkerBtn" class="icon-button" title="Add Marker">
+        <img id="addMarkerIcon" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M12 5v14M5 12h14'/%3E%3C/svg%3E" alt="Add marker icon">
+        <span class="sr-only">Add Marker</span>
+      </button>
+    </div>
+    <p>Interactive map showing popular tourist spots, disaster-prone areas, and geospatial conditions. Use the markers and shaded regions to understand safety and activity zones.</p>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-color" style="background:#1f78b4"></span> Tourist Spot</div>
+      <div class="legend-item"><span class="legend-color" style="background:#e31a1c"></span> Disaster-Prone</div>
+      <div class="legend-item"><span class="legend-color" style="background:#ff7f00"></span> Moderate Risk</div>
+      <div class="legend-item"><span class="legend-color" style="background:#33a02c"></span> Low Risk</div>
+    </div>
+    <div class="info-box">
+      <p><strong>Note:</strong> This example uses sample locations and conditions. In a production system, connect to geospatial APIs or datasets for dynamic disaster risk and tourism intelligence.</p>
+    </div>
+  </div>
+  <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    const map = L.map('map').setView([27.7090, 85.3131], 10);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+    console.log("tile layer added");
+
+    function addTouristSpots(spots) {
+    spots.forEach(spot => {
+        L.marker(spot.coords, { title: spot.name })
+            .addTo(map)
+            .bindPopup(
+                `<strong>${spot.name}</strong><br>${spot.description}`
+            );
+    });
+    }
+
+    function addDisasterZones(zones) {
+      zones.forEach(zone => {
+        L.circle(zone.coords, {
+          color: '#e31a1c',
+          fillColor: '#fbb4ae',
+          fillOpacity: 0.4,
+          radius: zone.radius
+        })
+          .addTo(map)
+          .bindPopup(`<strong>${zone.name}</strong><br>${zone.description}`);
+      });
+    }
+
+    function addConditionAreas(areas) {
+      areas.forEach(area => {
+        L.polygon(area.coords, {
+          color: area.color,
+          fillColor: area.color,
+          fillOpacity: 0.25
+        })
+          .addTo(map)
+          .bindPopup(`<strong>${area.name}</strong><br>${area.description}`);
+      });
+    }
+
+    fetch('locations.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Unable to load location data');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("JSON loaded:", data);
+
+        addTouristSpots(data.touristSpots || []);
+        addDisasterZones(data.disasterZones || []);
+        addConditionAreas(data.conditionAreas || []);
+      })
+      .catch(error => {
+        console.error('Error loading location data:', error);
+      });
+
+    const customMarkerLayer = L.layerGroup().addTo(map);
+    let addMarkerMode = false;
+    let nextCustomMarkerId = 0;
+
+    const addMarkerBtn = document.getElementById('addMarkerBtn');
+    const addMarkerIcon = document.getElementById('addMarkerIcon');
+
+    addMarkerBtn.addEventListener('click', () => {
+      addMarkerMode = !addMarkerMode;
+      addMarkerBtn.classList.toggle('active', addMarkerMode);
+      addMarkerBtn.title = addMarkerMode ? 'Click map to place marker' : 'Add Marker';
+      addMarkerIcon.alt = addMarkerMode ? 'Click map to place marker' : 'Add marker icon';
+    });
+
+    map.on('click', (event) => {
+      if (!addMarkerMode) {
+        return;
+      }
+      const { lat, lng } = event.latlng;
+      const markerId = ++nextCustomMarkerId;
+      const marker = L.marker([lat, lng], {
+        title: 'Custom marker',
+        customId: markerId
+      }).addTo(customMarkerLayer);
+
+      const popupContent = `
+        <strong>Custom Marker</strong><br>
+        Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}<br>
+        <button onclick="removeCustomMarker(${markerId})" style="margin-top:8px;padding:6px 10px;border:none;border-radius:6px;background:#e31a1c;color:#fff;cursor:pointer;">
+          Remove marker
+        </button>
+      `;
+
+      marker.bindPopup(popupContent);
+      marker.on('mouseover', () => marker.openPopup());
+      marker.openPopup();
+
+      addMarkerMode = false;
+      addMarkerBtn.classList.remove('active');
+      addMarkerBtn.title = 'Add Marker';
+      addMarkerIcon.alt = 'Add marker icon';
+    });
+
+    function removeCustomMarker(markerId) {
+      customMarkerLayer.eachLayer(layer => {
+        if (layer.options.customId === markerId) {
+          customMarkerLayer.removeLayer(layer);
+        }
+      });
+    }
+
+    function highlightMarker(latlng, text) {
+      L.circleMarker(latlng, {
+        radius: 6,
+        color: '#1f78b4',
+        fillColor: '#1f78b4',
+        fillOpacity: 0.9
+      })
+        .addTo(map)
+        .bindPopup(text);
+    }
+
+    highlightMarker([27.7150, 85.3200], 'Smart mapping system ready: click markers for details.');
+  </script>
+</body>
+</html>
