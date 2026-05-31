@@ -8,42 +8,30 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-       color: white;
-     background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b') no-repeat center center/cover;
-      display: block;
+      background: #f4f6f9;
+      display: flex;
     }
     nav.sidebar {
-      width: 100%;
+      width: 250px;
       background: #1e2a38;
       color: #fff;
       display: flex;
-      flex-direction: row;
-      align-items: center;
+      flex-direction: column;
       justify-content: space-between;
-      padding: 10px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      height: 100vh;
+      padding: 20px 0;
     }
     nav.sidebar h2 {
-      margin: 0;
-      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
     }
     nav.sidebar ul {
       list-style: none;
       padding: 0;
-      margin: 0;
-      display: flex;
-      gap: 10px;
-      flex-wrap: nowrap;
-      align-items: center;
-      overflow-x: auto;
-      white-space: nowrap;
     }
     nav.sidebar li {
-      padding: 10px 15px;
+      padding: 12px 20px;
       cursor: pointer;
-      white-space: nowrap;
     }
     nav.sidebar li:hover,
     nav.sidebar li:focus {
@@ -51,9 +39,9 @@
       outline: none;
     }
     .profile {
-      padding: 10px 20px;
-      border-top: none;
-      text-align: right;
+      padding: 20px;
+      border-top: 1px solid #444;
+      text-align: center;
       font-size: 14px;
     }
     main {
@@ -73,7 +61,7 @@
     .header-text p {
       margin: 0;
       font-size: 14px;
-      color: #090a38;
+      color: #555;
     }
     .header-actions {
       display: flex;
@@ -117,12 +105,11 @@
       margin-bottom: 20px;
     }
     .stat {
-      background: #1e2a38;
-      color: #fff;
+      background: #fff;
       padding: 15px;
       border-radius: 8px;
       flex: 1;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .map-preview {
       background: #fff;
@@ -161,20 +148,19 @@
   <nav class="sidebar" aria-label="Main navigation">
     <h2>SafeTrip</h2>
     <ul>
-      
+      <li tabindex="0">Dashboard</li>
       <li tabindex="0">Live Map</li>
       <li tabindex="0">Alerts</li>
       <li tabindex="0">My Trips</li>
-      
+      <li tabindex="0">Check-ins</li>
       <li tabindex="0">AI Assistant</li>
       <li tabindex="0">Health Services</li>
-      
-      
+      <li tabindex="0">Route Planner</li>
+      <li tabindex="0">Travel Advisory</li>
       <li tabindex="0">Settings</li>
     </ul>
     <div class="profile" role="contentinfo">
-     <img src="profile-placeholder.png" alt="Profile Picture" style="width:30px; height:30px; border-radius:50%; vertical-align:middle;">
-            
+      Priya Adhikari – Traveler
     </div>
   </nav>
 
@@ -203,7 +189,7 @@
 
     <section class="stats" aria-label="Safety statistics">
       <div class="stat" role="status">Overall Safety: 8.6/10 Very Good</div>
-      <div class="stat" role="status" id="activeAlertsStat">Active Alerts: 3</div>
+      <div class="stat" role="status">Active Alerts: 3</div>
       <div class="stat" role="status">Check-ins: 12 This Trip</div>
       <div class="stat" role="status">SOS Used: 0 This Trip</div>
     </section>
@@ -266,15 +252,6 @@
       alert("Current Weather: Sunny, 25°C");
     }
 
-    function updateActiveAlertsCount() {
-      const alertItems = document.querySelectorAll('#notificationPanel ul li');
-      const count = alertItems.length;
-      const activeAlertsStat = document.getElementById('activeAlertsStat');
-      if (activeAlertsStat) {
-        activeAlertsStat.textContent = `Active Alerts: ${count}`;
-      }
-    }
-
     function toggleChat() {
       const chatBox = document.getElementById('chatBox');
       const chatInput = document.getElementById('chatInput');
@@ -319,31 +296,5 @@
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll to latest message
   }
-
-  updateActiveAlertsCount();
-  
-window.onload = function () {
-
-    if (navigator.geolocation) {
-
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                console.log("Location Access Granted");
-
-                console.log(
-                    position.coords.latitude,
-                    position.coords.longitude
-                );
-            },
-
-            function(error) {
-                console.log("Location Access Denied");
-            }
-        );
-
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
-
-};
 </script>
+SS

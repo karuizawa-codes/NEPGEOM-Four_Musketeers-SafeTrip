@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOS Emergency Button</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f4f7fc;
+}
+
+.container{
+    text-align:center;
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    width:400px;
+}
+
+h1{
+    margin-bottom:20px;
+    color:#333;
+}
+
+.sos-btn{
+    width:180px;
+    height:180px;
+    border:none;
+    border-radius:50%;
+    background:#ff2d55;
+    color:white;
+    font-size:36px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 8px 20px rgba(255,45,85,0.4);
+}
+
+.sos-btn:hover{
+    transform:scale(1.05);
+}
+
+.status{
+    margin-top:25px;
+    font-size:16px;
+    color:#444;
+}
+
+.location{
+    margin-top:15px;
+    background:#f1f5f9;
+    padding:12px;
+    border-radius:10px;
+    word-break:break-word;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Emergency SOS</h1>
+
+    <button class="sos-btn" onclick="sendSOS()">
+        🚨 SOS
+    </button>
+
+    <div class="status" id="status">
+        Press SOS in an emergency
+    </div>
+
+    <div class="location" id="location">
+        Location not available
+    </div>
+
+</div>
+
+<script>
+
+function sendSOS(){
+
+    const status = document.getElementById("status");
+    const locationBox = document.getElementById("location");
+
+    status.innerHTML = "Getting your location...";
+
+    if(navigator.geolocation){
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position){
+
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                locationBox.innerHTML =
+                `
+                Latitude: ${lat}<br>
+                Longitude: ${lng}<br><br>
+                <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
+                Open in Google Maps
+                </a>
+                `;
+
+                status.innerHTML =
+                "🚨 SOS Alert Sent Successfully!";
+
+                alert(
+                "Emergency Alert Triggered!\n\nLocation Captured Successfully."
+                );
+
+            },
+
+            function(error){
+                status.innerHTML =
+                "Unable to access location.";
+            }
+
+        );
+
+    }else{
+        status.innerHTML =
+        "Geolocation not supported.";
+    }
+
+}
+
+</script>
+
+</body>
+</html>
+<script>
+window.onload = function () {
+
+    if (navigator.geolocation) {
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                console.log("Location Access Granted");
+
+                console.log(
+                    position.coords.latitude,
+                    position.coords.longitude
+                );
+            },
+
+            function(error) {
+                console.log("Location Access Denied");
+            }
+        );
+
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+
+};
+</script>
