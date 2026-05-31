@@ -24,14 +24,29 @@
       justify-content: space-between;
       align-items: center;
     }
-    nav h1 {
+    nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    nav .brand img {
+      width: 88px;
+      height: 88px;
+      object-fit: contain;
+      border-radius: 18px;
+      background: rgba(255,255,255,0);
+    }
+    nav .brand-text h1 {
+      margin: 0;
       font-size: 2rem;
       font-weight: bold;
+      line-height: 1.1;
     }
-    nav h1 span {
+    nav .brand-text h1 span {
       color: #3b82f6;
     }
-    nav p {
+    nav .brand-text p {
+      margin: 6px 0 0;
       font-size: 0.9rem;
       color: #ccc;
     }
@@ -188,9 +203,12 @@
   <div class="overlay">
     <!-- Navbar -->
     <nav>
-      <div>
-        <h1>Safe<span>Trip</span></h1>
-        <p>Tourism Safety Platform</p>
+      <div class="brand">
+        <img src="logo.jpg" alt="SafeTrip logo" >
+        <div class="brand-text">
+          <h1>Safe<span>Trip</span></h1>
+          <p>Tourism Safety Platform</p>
+        </div>
       </div>
       <div class="links">
         <a href="#">Features</a>
@@ -198,7 +216,7 @@
         <a href="#">About Us</a>
         <a href="#">Blog</a>
       </div>
-      <button>Get the App</button>
+      <button>SIGN IN</button>
     </nav>
 
     <!-- Alert Bar -->
@@ -273,3 +291,16 @@
         <div class="stat">
           <h3>98%</h3>
           <p>User Satisfaction</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="sos">
+      <button>
+        SOS
+        <span>Emergency</span>
+      </button>
+    </div>
+  </div>
+</body>
+</html>
