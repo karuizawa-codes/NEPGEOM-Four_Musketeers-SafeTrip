@@ -14,7 +14,7 @@ http.createServer((req, res) => {
         res.end();
         return;
     }
-    
+
     if (req.method === "POST" &&
         req.url === "/register") {
 
@@ -48,7 +48,6 @@ http.createServer((req, res) => {
             if (existing) {
 
                 res.writeHead(400);
-
                 res.end(
                     JSON.stringify({
                         message:"Email already exists"
@@ -58,6 +57,16 @@ http.createServer((req, res) => {
                 return;
             }
 
+            const crypto = require("crypto");
+
+            const hashedPassword =
+                crypto
+                .createHash("sha256")
+                .update(user.password)
+                .digest("hex");
+
+            user.password = hashedPassword;
+
             users.push(user);
 
             fs.writeFileSync(
@@ -66,7 +75,6 @@ http.createServer((req, res) => {
             );
 
             res.writeHead(200);
-
             res.end(
                 JSON.stringify({
                     message:"Registered"
