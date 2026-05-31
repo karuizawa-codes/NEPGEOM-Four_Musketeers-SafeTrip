@@ -7,7 +7,7 @@
       display: block;
     }
     nav.sidebar {
-      width: 4525px;
+      width: 96%;
       background: #1e2a38;
       color: #fff;
       display: flex;
@@ -38,6 +38,7 @@
       list-style: none;
       padding: 0;
       margin: 0;
+      margin-left: 77%;
       display: flex;
       gap: 10px;
       flex-wrap: nowrap;
@@ -46,7 +47,7 @@
       white-space: nowrap;
     }
     nav.sidebar li {
-      padding: 10px 15px;
+      padding: 10px 10px;
       cursor: pointer;
       white-space: nowrap;
     }
