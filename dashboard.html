@@ -26,7 +26,7 @@
       
       
       
-     <li tabindex="0"><img src="setting.png" alt="Settings" style="width:30px; height:30px;"></li>
+    <li tabindex="0"><button onclick="location.href='sos_map.html'" class="icon-button"><img src="sos.png" height="50" width="50" alt="SOS CALL" class="sos-icon"></button></li>
     </ul>
     <div class="profile" role="contentinfo">
      <img src="profile-placeholder.png" alt="Profile Picture" style="width:30px; height:30px; border-radius:50%; vertical-align:middle;">
@@ -93,7 +93,7 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     function mapButtonClick() {
-      window.location.href = 'map.html';
+      window.location.href = 'maps.html';
     }
 
     function loadSOS(){
