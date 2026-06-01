@@ -2,6 +2,11 @@
   {
     "latitude": 27.6666,
     "longitude": 85.35,
-    "timestamp": 1780286361840
+    "timestamp": 1780288361940
+  },
+  {
+    "latitude": 27,
+    "longitude": 85,
+    "timestamp": 1780288310875
   }
 ]
