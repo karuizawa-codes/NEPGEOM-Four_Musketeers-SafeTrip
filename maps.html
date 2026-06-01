@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GoGO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <style>
+    /* GLOBAL LAYOUT */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex; /* Flexbox puts the map on the left, sidebar on the right */
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    /* MAP CONTAINER */
+    #map {
+      flex-grow: 1; 
+      height: 100%;
+      position: relative;
+      background: #e5e7eb;
+    }
+
+    /* -----------------------------------------------------
+       THE TOP-RIGHT FLOATING SEARCH BAR STYLES
+       ----------------------------------------------------- */
+    .leaflet-control-geocoder.leaflet-control {
+      margin-top: 20px !important;
+      margin-right: 20px !important; /* Pushes it away from the right sidebar */
+      border: none !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+      border-radius: 8px !important;
+      background: #ffffff !important;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .leaflet-control-geocoder-form input {
+      font-size: 15px !important;
+      padding: 12px 15px !important;
+      width: 300px !important;
+      border: none !important;
+      outline: none !important;
+      color: #1e293b;
+    }
+
+    .leaflet-control-geocoder-icon {
+      width: 44px !important;
+      height: 44px !important;
+      background-size: 20px 20px !important;
+      background-position: center !important;
+      border-radius: 8px !important;
+      cursor: pointer;
+    }
+
+    /* SIDEBAR DASHBOARD (RIGHT SIDE) */
+    #sidebar {
+      width: 380px;
+      background: #f0f9ff;
+      border-left: 1px solid #e0e7ff;
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .sidebar-header h2 { 
+      margin: 0; 
+      font-size: 1.8rem; 
+      font-weight: 700; 
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .sidebar-header .tagline { 
+      margin: 8px 0 0 0; 
+      font-size: 0.9rem; 
+      color: rgba(255, 255, 255, 0.9);
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .sidebar-content {
+      padding: 24px;
+      overflow-y: auto;
+      flex-grow: 1;
+      background: #f0f9ff;
+    }
+
+    /* INFO CARDS IN SIDEBAR */
+    .info-card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
+      border: 1px solid #cffafe;
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+    }
+
+    .info-card:hover {
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .info-card h3 { 
+      margin-top: 0; 
+      color: #0369a1; 
+      font-size: 1.15rem; 
+      border-bottom: 2px solid #cffafe; 
+      padding-bottom: 12px;
+    }
+    .info-card p { 
+      margin: 14px 0; 
+      color: #475569; 
+      font-size: 0.95rem; 
+      line-height: 1.6; 
+    }
+    .data-label { 
+      font-weight: 700; 
+      color: #0369a1; 
+      display: inline-block; 
+      width: 85px; 
+    }
+    
+    .status-safe {
+      border-left: 4px solid #10b981; /* Green accent */
+    }
+
+    /* TRIP STATS PANEL */
+    .trip-stats-panel {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 18px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.25);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .trip-stats-panel:hover {
+      box-shadow: 0 12px 32px rgba(6, 182, 212, 0.35);
+    }
+
+    .trip-stats-panel h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+      padding-bottom: 14px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .point-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn-point {
+      flex: 1;
+      padding: 12px 14px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-point:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-point.active {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: white;
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.35);
+    }
+
+    .clear-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .clear-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(244, 63, 94, 0.4);
+    }
+
+    .gps-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .gps-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+    }
+
+    .gps-btn.loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .marker-a { color: #10b981; }
+    .marker-b { color: #f59e0b; }
+
+    .instruction-text {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      margin: 12px 0;
+      color: #0c4a6e;
+      font-weight: 500;
+      background: rgba(6, 182, 212, 0.08);
+      padding: 10px;
+      border-radius: 8px;
+      border-left: 3px solid #06b6d4;
+    }
+
+    /* LIVE TRACKING STYLES */
+    .tracking-panel {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 18px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+      display: none;
+    }
+
+    .tracking-panel.active {
+      display: block;
+      animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25); }
+      50% { box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4); }
+    }
+
+    .tracking-panel h3 {
+      margin-top: 0;
+      font-size: 1.15rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+      padding-bottom: 14px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .tracking-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tracking-stat:last-child {
+      border-bottom: none;
+    }
+
+    .tracking-stat-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+
+    .tracking-stat-value {
+      font-weight: 700;
+      font-size: 1.2rem;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .start-tracking-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 14px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .start-tracking-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .stop-tracking-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .stop-tracking-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .destination-reached {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+      text-align: center;
+    }
+
+    .destination-reached h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .destination-reached p {
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <h2>GoGO</h2>
+      <p class="tagline">Navigate. Explore. Discover.</p>
+    </div>
+    
+    <div class="sidebar-content" id="info-content">
+      <div class="trip-stats-panel">
+        <h3>Trip Statistics</h3>
+        
+        <div class="point-buttons">
+          <button class="btn-point" id="btn-set-start" onclick="setStartPoint()">Set Start</button>
+          <button class="btn-point" id="btn-set-destination" onclick="setEndPoint()">Set Destination</button>
+        </div>
+        <button class="gps-btn" id="btn-gps" onclick="useMyLocation()">Use My Location</button>
+        <button class="clear-btn" onclick="clearPoints()">Clear All</button>
+
+        <div class="instruction-text" id="instruction">
+          Click "Set Start" then click on the map to mark your starting point.
+        </div>
+
+        <div id="stats-container" style="display: none;">
+          <div class="stat-row">
+            <span class="stat-label">Total Distance:</span>
+            <span class="stat-value" id="total-distance">0 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Straight Line:</span>
+            <span class="stat-value" id="straight-distance">0 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Travel Time:</span>
+            <span class="stat-value" id="travel-time">0 min</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Start Coordinates:</span>
+            <span class="stat-value" id="start-coords" style="font-size: 0.9rem;">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">End Coordinates:</span>
+            <span class="stat-value" id="end-coords" style="font-size: 0.9rem;">--</span>
+          </div>
+        <button class="start-tracking-btn" id="btn-start-trip" onclick="startTracking()" style="margin-top: 16px;">Start Trip</button>
+        </div>
+      </div>
+
+      <!-- LIVE TRACKING PANEL -->
+      <div class="tracking-panel" id="tracking-panel">
+        <h3>Live Tracking</h3>
+        
+        <div class="tracking-stat">
+          <span class="tracking-stat-label">Distance Traveled:</span>
+          <span class="tracking-stat-value" id="distance-traveled">0 km</span>
+        </div>
+        
+        <div class="tracking-stat">
+          <span class="tracking-stat-label">Elapsed Time:</span>
+          <span class="tracking-stat-value" id="elapsed-time">0 min</span>
+        </div>
+        
+        <div class="tracking-stat">
+          <span class="tracking-stat-label">Current Speed:</span>
+          <span class="tracking-stat-value" id="current-speed">0 km/h</span>
+        </div>
+        
+        <div class="tracking-stat">
+          <span class="tracking-stat-label">Distance to Destination:</span>
+          <span class="tracking-stat-value" id="distance-remaining">-- km</span>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div style="margin-top: 14px;">
+          <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 6px;">Trip Progress</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <button class="stop-tracking-btn" onclick="stopTracking()" style="margin-top: 16px;">Stop Trip</button>
+      </div>
+
+      <!-- DESTINATION REACHED PANEL -->
+      <div class="destination-reached" id="destination-reached" style="display: none;">
+        <h3>Destination Reached</h3>
+        <p id="completion-stats"></p>
+        <button class="btn-point" onclick="startNewTrip()" style="width: 100%; margin-top: 12px;">Start New Trip</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Core state
+    let settingPoint = null;
+    let startPoint = null;
+    let endPoint = null;
+    let startMarker = null;
+    let endMarker = null;
+    let currentMarker = null;
+    let routeLayer = null;
+
+    // Live tracking state
+    let isTracking = false;
+    let trackingGeoId = null;
+    let trackingPath = [];
+    let trackingPolyline = null;
+    let trackingMarker = null;
+    let trackingStartTime = null;
+    let trackingDistance = 0;
+    let trackingTimer = null;
+    let lastPosition = null;
+    let routeTotalDistance = 0;  // Total distance of the planned route
+
+    // Haversine formula (used only for straight-line stat)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function secsToHuman(s) {
+      if (!isFinite(s)) return '--';
+      const mins = Math.round(s / 60);
+      if (mins >= 60) return `${Math.floor(mins/60)}h ${mins % 60}m`;
+      return `${mins}m`;
+    }
+
+    // Create a draggable marker with icon
+    function createMarker(latlng, type) {
+      const isStart = type === 'start';
+      const url = isStart ?
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png' :
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png';
+
+      const marker = L.marker(latlng, {
+        draggable: true,
+        icon: L.icon({
+          iconUrl: url,
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41]
+        })
+      });
+
+      marker.on('dragend', function(e) {
+        const p = e.target.getLatLng();
+        if (isStart) {
+          startPoint = { lat: p.lat, lng: p.lng };
+        } else {
+          endPoint = { lat: p.lat, lng: p.lng };
+        }
+        updateStatsAndRoute();
+      });
+
+      return marker;
+    }
+
+    function setStartPoint() {
+      settingPoint = 'start';
+      document.getElementById('btn-set-start').classList.add('active');
+      document.getElementById('btn-set-destination').classList.remove('active');
+      document.getElementById('instruction').textContent = 'Click on the map to set your start point.';
+    }
+
+    // Get current GPS location and set as start point
+    function useMyLocation() {
+      if (!navigator.geolocation) {
+        document.getElementById('instruction').textContent = 'Geolocation is not supported by your browser.';
+        return;
+      }
+
+      const btn = document.getElementById('btn-gps');
+      btn.classList.add('loading');
+      btn.textContent = 'Detecting location...';
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          // Set as start point
+          startPoint = { lat: lat, lng: lng };
+          if (startMarker) map.removeLayer(startMarker);
+          startMarker = createMarker([lat, lng], 'start').addTo(map).bindPopup('Your Location (Start)').openPopup();
+
+          // Center map on current location
+          map.setView([lat, lng], 15);
+
+          // Update UI
+          document.getElementById('btn-set-start').classList.add('active');
+          document.getElementById('btn-set-destination').classList.remove('active');
+          document.getElementById('instruction').textContent = 'Start point set to your location! Now set your destination.';
+
+          btn.classList.remove('loading');
+          btn.textContent = 'Use My Location';
+
+          updateStatsAndRoute();
+        },
+        function(error) {
+          btn.classList.remove('loading');
+          btn.textContent = 'Use My Location';
+
+          let errorMsg = '';
+          if (error.code === 1) {
+            errorMsg = 'Permission denied. Enable location in browser settings.';
+          } else if (error.code === 2) {
+            errorMsg = 'Position unavailable. Try moving to a location with better GPS signal.';
+          } else if (error.code === 3) {
+            errorMsg = 'Location request timed out. Please try again.';
+          } else {
+            errorMsg = 'Unable to get location. Make sure location is enabled.';
+          }
+          document.getElementById('instruction').textContent = errorMsg;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function setEndPoint() {
+      if (!startPoint) {
+        document.getElementById('instruction').textContent = 'Please set a start point first!';
+        return;
+      }
+      settingPoint = 'end';
+      document.getElementById('btn-set-destination').classList.add('active');
+      document.getElementById('btn-set-start').classList.remove('active');
+      document.getElementById('instruction').textContent = 'Click on the map to set your destination.';
+    }
+
+    function clearPoints() {
+      startPoint = null; endPoint = null; settingPoint = null;
+      if (startMarker) map.removeLayer(startMarker);
+      if (endMarker) map.removeLayer(endMarker);
+      if (routeLayer) map.removeLayer(routeLayer);
+      startMarker = endMarker = routeLayer = null;
+      document.getElementById('btn-set-start').classList.remove('active');
+      document.getElementById('btn-set-destination').classList.remove('active');
+      document.getElementById('stats-container').style.display = 'none';
+      document.getElementById('instruction').textContent = 'Click "Set Start" then click on the map to mark your starting point.';
+      showPlaceInfo(null);
+    }
+
+    // Update stats (straight-line) and trigger route fetch
+    function updateStatsAndRoute() {
+      if (startPoint && endPoint) {
+        const straight = calculateDistance(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng);
+        document.getElementById('straight-distance').textContent = straight.toFixed(2) + ' km';
+        document.getElementById('start-coords').textContent = `${startPoint.lat.toFixed(4)}°, ${startPoint.lng.toFixed(4)}°`;
+        document.getElementById('end-coords').textContent = `${endPoint.lat.toFixed(4)}°, ${endPoint.lng.toFixed(4)}°`;
+        document.getElementById('stats-container').style.display = 'block';
+        fetchRoute();
+      }
+    }
+
+    // Fetch route from OSRM public server and draw it
+    async function fetchRoute() {
+      if (!startPoint || !endPoint) return;
+      const url = `https://router.project-osrm.org/route/v1/driving/${startPoint.lng},${startPoint.lat};${endPoint.lng},${endPoint.lat}?overview=full&geometries=geojson&steps=true`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.routes || data.routes.length === 0) {
+          document.getElementById('instruction').textContent = 'No route found.';
+          return;
+        }
+        const route = data.routes[0];
+        const distKm = route.distance / 1000;
+        const durationSec = route.duration;
+
+        routeTotalDistance = distKm;  // Save total route distance for progress bar
+
+        document.getElementById('total-distance').textContent = distKm.toFixed(2) + ' km';
+        document.getElementById('travel-time').textContent = secsToHuman(durationSec);
+
+        // draw route
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.geoJSON(route.geometry, { style: { color: '#3b82f6', weight: 5, opacity: 0.8 } }).addTo(map);
+        map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+
+        // show turn-by-turn in sidebar
+        const stepsContainer = document.getElementById('route-steps');
+        if (stepsContainer) {
+          stepsContainer.innerHTML = '';
+          const legs = route.legs || [];
+          legs.forEach((leg, i) => {
+            leg.steps.forEach((s, idx) => {
+              const d = (s.distance/1000).toFixed(2) + ' km';
+              const el = document.createElement('div');
+              el.className = 'info-card';
+              el.style.marginBottom = '8px';
+              el.innerHTML = `<strong>${s.maneuver.instruction || s.maneuver.type}</strong><div style="color:#475569">${d} • ${secsToHuman(s.duration)}</div>`;
+              stepsContainer.appendChild(el);
+            });
+          });
+        }
+
+      } catch (err) {
+        console.error('Routing error', err);
+        document.getElementById('instruction').textContent = 'Routing error. Check console.';
+      }
+    }
+
+    // Initialize map
+    var map = L.map('map', { zoomControl: false }).setView([28.75, 83.85], 9);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors | HimalayaGuard System', maxZoom: 19 }).addTo(map);
+
+    // Click handler for setting points
+    map.on('click', function(e) {
+      if (settingPoint === 'start') {
+        startPoint = { lat: e.latlng.lat, lng: e.latlng.lng };
+        if (startMarker) map.removeLayer(startMarker);
+        startMarker = createMarker(e.latlng, 'start').addTo(map).bindPopup('START 📍').openPopup();
+        document.getElementById('instruction').textContent = 'Start point set! Click "Set End" to continue.';
+        updateStatsAndRoute();
+      } else if (settingPoint === 'end') {
+        endPoint = { lat: e.latlng.lat, lng: e.latlng.lng };
+        if (endMarker) map.removeLayer(endMarker);
+        endMarker = createMarker(e.latlng, 'end').addTo(map).bindPopup('Destination').openPopup();
+        document.getElementById('instruction').textContent = 'Destination set! Review your route or start the trip.';
+        updateStatsAndRoute();
+      }
+    });
+
+    // Geocoder (search)
+    var geocoder = L.Control.geocoder({ defaultMarkGeocode: false, placeholder: "Search locations in Nepal...", errorMessage: "Nothing found." }).addTo(map);
+    geocoder.setPosition("topright");
+
+    geocoder.on('markgeocode', function(e) {
+      const result = e.geocode;
+      const lat = result.center.lat;
+      const lng = result.center.lng;
+      map.fitBounds(result.bbox);
+      if (currentMarker) map.removeLayer(currentMarker);
+
+      // popup with actions to set as start/end or show details
+      const popupHtml = `<strong>${escapeHtml(result.name || 'Location')}</strong><br/><button onclick="setStartFromSearch(${lat}, ${lng})">Set as Start</button> <button onclick="setEndFromSearch(${lat}, ${lng})">Set as Destination</button> <button onclick="showPlaceFromSearch(${lat}, ${lng})">Show Info</button>`;
+
+      currentMarker = L.marker(result.center).addTo(map).bindPopup(popupHtml).openPopup();
+    });
+
+    // Helpers from search popup
+    function setStartFromSearch(lat, lng) {
+      startPoint = { lat: lat, lng: lng };
+      if (startMarker) map.removeLayer(startMarker);
+      startMarker = createMarker([lat, lng], 'start').addTo(map).bindPopup('Start').openPopup();
+      updateStatsAndRoute();
+      if (currentMarker) currentMarker.closePopup();
+    }
+
+    function setEndFromSearch(lat, lng) {
+      endPoint = { lat: lat, lng: lng };
+      if (endMarker) map.removeLayer(endMarker);
+      endMarker = createMarker([lat, lng], 'end').addTo(map).bindPopup('Destination').openPopup();
+      updateStatsAndRoute();
+      if (currentMarker) currentMarker.closePopup();
+    }
+
+    function showPlaceFromSearch(lat, lng) {
+      fetchPlaceInfo(lat, lng).then(info => showPlaceInfo(info));
+    }
+
+    // Reverse geocode (Nominatim) to get place details
+    async function fetchPlaceInfo(lat, lng) {
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        return data;
+      } catch (err) {
+        console.error('Place info error', err);
+        return null;
+      }
+    }
+
+    function showPlaceInfo(data) {
+      const card = document.querySelector('.info-card');
+      if (!data) {
+        card.innerHTML = `<h3>System Ready</h3><p>Awaiting coordinates. Use the search engine on the top right of the map to locate a specific village, pass, or emergency hub.</p>`;
+        return;
+      }
+      const displayName = data.display_name || 'Unknown place';
+      const lat = data.lat || '';
+      const lon = data.lon || '';
+      const type = data.type || '';
+
+      card.innerHTML = `<h3>${escapeHtml(displayName)}</h3>
+                        <p><span class="data-label">Type:</span> ${escapeHtml(type)}</p>
+                        <p><span class="data-label">Coordinates:</span> ${lat}, ${lon}</p>
+                        <p style="font-size:0.9rem;color:#64748b">Data from OpenStreetMap / Nominatim</p>`;
+    }
+
+    // small helper to avoid XSS in popups
+    function escapeHtml(s) {
+      if (!s) return '';
+      return s.replace(/[&<>"']/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]; });
+    }
+
+    // Add a minimal route steps container in the sidebar if not present
+    (function ensureStepsContainer(){
+      let el = document.getElementById('route-steps');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'route-steps';
+        el.style.marginTop = '12px';
+        document.getElementById('info-content').appendChild(el);
+      }
+    })();
+
+    // ========== LIVE TRACKING FUNCTIONS ==========
+    function startTracking() {
+      if (!startPoint || !endPoint) {
+        document.getElementById('instruction').textContent = '⚠️ Please set both start and destination points first!';
+        return;
+      }
+
+      // Don't start tracking twice
+      if (isTracking) {
+        return;
+      }
+
+      // Request geolocation permission
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        return;
+      }
+
+      isTracking = true;
+      trackingPath = [];
+      trackingDistance = 0;
+      trackingStartTime = Date.now();
+      lastPosition = null;
+
+      // Show tracking panel
+      document.getElementById('tracking-panel').classList.add('active');
+      document.getElementById('stats-container').style.display = 'none';
+
+      // Start GPS tracking with continuous updates
+      trackingGeoId = navigator.geolocation.watchPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+          const speed = position.coords.speed || 0;
+
+          const currentPos = { lat, lng };
+          trackingPath.push(currentPos);
+
+          // Calculate distance traveled
+          if (lastPosition) {
+            const segmentDist = calculateDistance(lastPosition.lat, lastPosition.lng, lat, lng);
+            trackingDistance += segmentDist;
+          }
+          lastPosition = currentPos;
+
+          // Draw tracking polyline
+          if (trackingPolyline) {
+            map.removeLayer(trackingPolyline);
+          }
+          trackingPolyline = L.polyline(trackingPath, {
+            color: '#3b82f6',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '5, 5'
+          }).addTo(map);
+
+          // Update or create tracking marker
+          if (trackingMarker) {
+            map.removeLayer(trackingMarker);
+          }
+          trackingMarker = L.marker([lat, lng], {
+            title: 'Current Position',
+            icon: L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41]
+            })
+          }).addTo(map).bindPopup('Current Position').openPopup();
+
+          // Update tracking stats
+          updateTrackingStats(speed);
+
+          // Check if destination reached (within 50 meters)
+          const distToDestination = calculateDistance(lat, lng, endPoint.lat, endPoint.lng);
+          document.getElementById('distance-remaining').textContent = distToDestination.toFixed(2) + ' km';
+
+          if (distToDestination < 0.05) {  // 50 meters
+            destinationReached();
+          }
+
+          // Fit map bounds to show tracking path
+          if (trackingPolyline) {
+            map.fitBounds(trackingPolyline.getBounds(), { padding: [50, 50] });
+          }
+        },
+        function(error) {
+          console.error('Geolocation error', error);
+          isTracking = false;
+          document.getElementById('tracking-panel').classList.remove('active');
+
+          let errorMsg = '';
+          if (error.code === 1) {
+            // Permission denied
+            errorMsg = 'Permission denied. Please enable location access in your browser settings.';
+          } else if (error.code === 2) {
+            // Position unavailable
+            errorMsg = 'Position unavailable. Try moving to a location with better GPS signal.';
+          } else if (error.code === 3) {
+            // Timeout
+            errorMsg = 'Location request timed out. Please try again.';
+          } else {
+            errorMsg = 'Unable to access location. Make sure location is enabled in your browser.';
+          }
+          document.getElementById('instruction').textContent = errorMsg;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+
+      document.getElementById('instruction').textContent = 'Live tracking started. Navigate to your destination!';
+    }
+
+    function updateTrackingStats(speed) {
+      const now = Date.now();
+      const elapsedMs = now - trackingStartTime;
+      const elapsedMin = Math.floor(elapsedMs / 60000);
+      const elapsedSec = Math.floor((elapsedMs % 60000) / 1000);
+
+      document.getElementById('distance-traveled').textContent = trackingDistance.toFixed(2) + ' km';
+      document.getElementById('elapsed-time').textContent = `${elapsedMin}m ${elapsedSec}s`;
+      document.getElementById('current-speed').textContent = (speed * 3.6).toFixed(1) + ' km/h';
+
+      // Update progress bar
+      if (routeTotalDistance > 0) {
+        const progressPercent = Math.min((trackingDistance / routeTotalDistance) * 100, 100);
+        document.getElementById('progress-fill').style.width = progressPercent + '%';
+      }
+    }
+
+    function stopTracking() {
+      if (trackingGeoId !== null) {
+        navigator.geolocation.clearWatch(trackingGeoId);
+      }
+      isTracking = false;
+      trackingGeoId = null;
+      clearInterval(trackingTimer);
+
+      document.getElementById('tracking-panel').classList.remove('active');
+      document.getElementById('instruction').textContent = 'Tracking stopped.';
+    }
+
+    function destinationReached() {
+      stopTracking();
+
+      const elapsedMs = Date.now() - trackingStartTime;
+      const elapsedMin = Math.floor(elapsedMs / 60000);
+      const elapsedSec = Math.floor((elapsedMs % 60000) / 1000);
+
+      const completionHtml = `<strong>Total Distance:</strong> ${trackingDistance.toFixed(2)} km<br/>
+                             <strong>Total Time:</strong> ${elapsedMin}m ${elapsedSec}s<br/>
+                             <strong>Avg Speed:</strong> ${(trackingDistance / (elapsedMs / 3600000)).toFixed(2)} km/h`;
+
+      document.getElementById('completion-stats').innerHTML = completionHtml;
+      document.getElementById('destination-reached').style.display = 'block';
+      document.getElementById('tracking-panel').classList.remove('active');
+    }
+
+    function startNewTrip() {
+      clearPoints();
+      document.getElementById('destination-reached').style.display = 'none';
+      if (trackingPolyline) map.removeLayer(trackingPolyline);
+      if (trackingMarker) map.removeLayer(trackingMarker);
+      trackingPolyline = null;
+      trackingMarker = null;
+    }
+
+    // Update tracking stats every second while tracking
+    setInterval(function() {
+      if (isTracking) {
+        updateTrackingStats(0);
+      }
+    }, 1000);
+
+    // Expose some functions globally (used by inline onclicks)
+    window.setStartFromSearch = setStartFromSearch;
+    window.setEndFromSearch = setEndFromSearch;
+    window.showPlaceFromSearch = showPlaceFromSearch;
+    window.setStartPoint = setStartPoint;
+    window.setEndPoint = setEndPoint;
+    window.clearPoints = clearPoints;
+    window.startTracking = startTracking;
+    window.stopTracking = stopTracking;
+    window.startNewTrip = startNewTrip;
+    window.useMyLocation = useMyLocation;
+
+  </script>
+</body>
+</html>
