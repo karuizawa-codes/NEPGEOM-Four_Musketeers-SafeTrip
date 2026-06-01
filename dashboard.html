@@ -6,6 +6,13 @@
  
 
   
+  <style>
+    .assistant-map-row { display:flex; gap:16px; align-items:flex-start; }
+    .assistant-map-row .chat-container { flex: 1 1 320px; max-width:380px; }
+    .assistant-map-row #map { flex: 2 1 720px; min-height:480px; height:60vh; border:1px solid #ddd; }
+    /* ensure map fills its container */
+    #map { width:100%; }
+  </style>
 </head>
 <body>
   <nav class="sidebar" aria-label="Main navigation">
@@ -71,7 +78,7 @@
             <button onclick="sendMessage()">Send</button>
           </div>
         </div>
-        <div id="map"></div>
+        <div id="map" role="button" tabindex="0" onclick="mapButtonClick()" onkeydown="if(event.key==='Enter'||event.key===' ') mapButtonClick()" style="cursor:pointer;"></div>
       </div>
       <div class="sos">
         <button onclick="location.href='sos.html'">
@@ -83,6 +90,10 @@
     // Leaflet (OSM) example
     var map = L.map('map').setView([27.7, 85.3], 7);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    function mapButtonClick() {
+      window.location.href = 'map.html';
+    }
 
     function loadSOS(){
       fetch("http://localhost:3000/sos")
