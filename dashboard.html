@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SafeTrip Dashboard</title>
-  <link rel="stylesheet" href="dashboard.css">
+   <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> 
+ 
+
+  
 </head>
 <body>
   <nav class="sidebar" aria-label="Main navigation">
@@ -12,20 +13,25 @@
       <img src="logo.jpg" alt="SafeTrip logo">
       <h2>SafeTrip</h2>
     </div>
-    <ul>      
-      <li tabindex="0"><img src="setting.png" alt="Settings" style="width:30px; height:30px;"></li>
+    <ul>
+      
+     
+      
+      
+      
+     <li tabindex="0"><img src="setting.png" alt="Settings" style="width:30px; height:30px;"></li>
     </ul>
     <div class="profile" role="contentinfo">
-     <img src="profile-placeholder.png" alt="Profile Picture" style="width:30px; height:30px; border-radius:50%; vertical-align:middle;" onerror="this.onerror=null; this.src='backup_pfp.jpg';">
-    </div>        
-   
+     <img src="profile-placeholder.png" alt="Profile Picture" style="width:30px; height:30px; border-radius:50%; vertical-align:middle;">
+            
+    </div>
   </nav>
 
   <main>
     <!-- Header with split text, notification, and weather -->
     <header>
       <div class="header-text">
-        <h1>Good Morning, Priya!</h1>
+        <h1>Good Morning, Priya! 👋</h1>
         <p>Stay informed. Stay alert. Stay safe.</p>
       </div>
       <div class="header-actions">
@@ -51,24 +57,45 @@
       <div class="stat" role="status">SOS Used: 0 This Trip</div>
     </section>
 
-    <section class="map-preview" aria-label="Live safety map preview">
-      [Live Safety Map Preview]
-    </section>
-
     <!-- AI Assistant Section (from previous upgrade) -->
     <section aria-label="AI Assistant">
-      <div class="chat-container">
-    <div id="chatbox" class="chatbox">
-        <div class="bot-message">
-            Hello! I'm SafeTrail AI. How can I help you?
+      <div class="assistant-map-row">
+        <div class="chat-container">
+          <div id="chatbox" class="chatbox">
+            <div class="bot-message">
+              Hello! I'm SafeTrail AI. How can I help you?
+            </div>
+          </div>
+          <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask me anything...">
+            <button onclick="sendMessage()">Send</button>
+          </div>
         </div>
-    </div>
+        <div id="map"></div>
+      </div>
+      <div class="sos">
+        <button onclick="location.href='sos.html'">
+          SOS
+          <span>Emergency</span>
+        </button>
+      </div>
+    <script>
+    // Leaflet (OSM) example
+    var map = L.map('map').setView([27.7, 85.3], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Ask me anything...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
+    function loadSOS(){
+      fetch("http://localhost:3000/sos")
+        .then(res => res.json())
+        .then(locations => {
+          locations.forEach(loc => {
+            L.marker([loc.latitude, loc.longitude]).addTo(map)
+              .bindPopup("SOS Alert at " + loc.timestamp);
+          });
+        });
+    }
+    setInterval(loadSOS, 5000); // refresh every 5s
+  </script>
       
     </section>
 
@@ -193,4 +220,48 @@ function getBotResponse(msg) {
     }
 
 };
+var weatherShown = false;
+ 
+    async function toggleWeather() {
+      var card = document.getElementById('weatherCard');
+      if (weatherShown) {
+        card.style.display = 'none';
+        weatherShown = false;
+        return;
+      }
+      weatherShown = true;
+      card.style.display = 'block';
+      card.innerHTML = '<div class="weather-card"><span style="color:#718096;font-size:13px">Fetching live weather…</span></div>';
+ 
+      try {
+        var res  = await fetch('https://api.open-meteo.com/v1/forecast?latitude=27.7172&longitude=85.3240&current_weather=true&timezone=Asia/Kathmandu');
+        var data = await res.json();
+        var w    = data.current_weather;
+ 
+        var codes = {
+          0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+          45:'Foggy', 48:'Icy fog', 51:'Light drizzle', 61:'Light rain',
+          63:'Moderate rain', 65:'Heavy rain', 71:'Light snow',
+          80:'Rain showers', 95:'Thunderstorm'
+        };
+        var icons = {
+          0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️', 45:'🌫️', 48:'🌫️',
+          51:'🌦️', 61:'🌧️', 63:'🌧️', 65:'⛈️', 71:'❄️',
+          80:'🌦️', 95:'⛈️'
+        };
+        var desc = codes[w.weathercode] || ('Code ' + w.weathercode);
+        var icon = icons[w.weathercode] || '🌡️';
+ 
+        card.innerHTML =
+          '<div class="weather-card">' +
+            '<div class="weather-temp">' + Math.round(w.temperature) + '°C</div>' +
+            '<div class="weather-info">' +
+              '<strong>' + icon + ' ' + desc + ' – Kathmandu</strong>' +
+              '<span>Wind: ' + w.windspeed + ' km/h &nbsp;·&nbsp; Live via Open-Meteo</span>' +
+            '</div>' +
+          '</div>';
+      } catch (err) {
+        card.innerHTML = '<div class="weather-card" style="color:#e53e3e">Could not fetch weather. Please check your connection.</div>';
+      }
+    }
 </script>
