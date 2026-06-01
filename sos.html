@@ -48,20 +48,39 @@ function sendSOS(){
                 `
                 Latitude: ${lat}<br>
                 Longitude: ${lng}<br><br>
-                <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
-                Open in Google Maps
-                </a>
+                Your location has been sent to emergency contacts.
                 `;
 
-                status.innerHTML =
-                "🚨 SOS Alert Sent Successfully!";
+                const sosData = {
+                    latitude: lat,
+                    longitude: lng,
+                    timestamp: Date.now()
+                };
 
-                alert(
-                "Emergency Alert Triggered!\n\nLocation Captured Successfully."
-                );
+                fetch("http://localhost:3000/sos", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(sosData)
+                })
+                .then(response => response.json())
+                .then(data => {
 
+                    status.innerHTML =
+                    "🚨 SOS Alert Sent Successfully!";
+
+                })
+                .catch(error => {
+
+                    console.error(error);
+
+                    status.innerHTML =
+                    "Failed to send SOS alert.";
+
+                });
             },
-
+            
             function(error){
                 status.innerHTML =
                 "Unable to access location.";

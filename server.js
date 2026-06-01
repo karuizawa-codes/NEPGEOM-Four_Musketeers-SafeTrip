@@ -138,6 +138,83 @@ http.createServer((req, res) => {
 
     return;
     }
+
+    // ---------------- SOS POST ----------------
+
+    if (req.method === "POST" && req.url === "/sos") {
+
+        let body = "";
+
+        req.on("data", chunk => {
+        body += chunk;
+        });
+
+        req.on("end", () => {
+
+        try {
+
+            const {
+                latitude,
+                longitude,
+                timestamp
+            } = JSON.parse(body);
+
+            let sosLocations = [];
+
+            try {
+                sosLocations = JSON.parse(
+                    fs.readFileSync(
+                        "sos.json",
+                        "utf8"
+                    )
+                );
+            }
+            catch {
+                sosLocations = [];
+            }
+
+            sosLocations.push({
+                latitude,
+                longitude,
+                timestamp
+            });
+
+            fs.writeFileSync(
+                "sos.json",
+                JSON.stringify(
+                    sosLocations,
+                    null,
+                    2
+                )
+            );
+
+            console.log(
+                `🚨 SOS Received: ${latitude}, ${longitude}`
+            );
+
+            res.writeHead(200, {
+                "Content-Type": "application/json"
+            });
+
+            res.end(JSON.stringify({
+                status: "Location received"
+            }));
+
+            } catch {
+
+            res.writeHead(400, {
+                "Content-Type": "application/json"
+            });
+
+            res.end(JSON.stringify({
+                status: "Invalid request"
+            }));
+        }
+    });
+
+    return;
+    }
+
     res.writeHead(404);
     res.end();
 
