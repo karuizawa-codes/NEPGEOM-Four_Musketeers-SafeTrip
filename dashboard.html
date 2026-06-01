@@ -65,7 +65,7 @@
     </section>
 
     <!-- AI Assistant Section (from previous upgrade) -->
-    <section aria-label="AI Assistant">
+    <section>
       <div class="assistant-map-row">
         <div class="chat-container">
           <div id="chatbox" class="chatbox">
@@ -80,6 +80,7 @@
         </div>
         <div id="map" role="button" tabindex="0" onclick="mapButtonClick()" onkeydown="if(event.key==='Enter'||event.key===' ') mapButtonClick()" style="cursor:pointer;"></div>
       </div>
+    </section>
       <div class="sos">
         <button onclick="location.href='sos.html'">
           SOS
@@ -92,7 +93,7 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     function mapButtonClick() {
-      window.location.href = 'maps.html';
+      window.location.href = 'map.html';
     }
 
     function loadSOS(){

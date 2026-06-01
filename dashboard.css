@@ -31,6 +31,7 @@
     nav.sidebar .brand img {
       width: 32px;
       height: 32px;
+      object-fit: contain;
       display: block;
     }
     nav.sidebar ul {
@@ -129,7 +130,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     section {
-      background: #fff;
+      
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 20px;
@@ -165,7 +166,7 @@
       border-radius: 10px;
       overflow: hidden;
       background: rgba(236, 238, 242, 0.544);
-      min-height: 400px;
+      height: 480px;
     }
 
     #map {
@@ -201,6 +202,7 @@
 }
 
 .input-area {
+  margin-top:125px;
     display: flex;
 }
 

@@ -53,6 +53,7 @@ body::before{
 
 .logo img{
     width:62px;
+    object-fit: contain;
 }
 
 .logo h2{
